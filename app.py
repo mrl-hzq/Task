@@ -23,7 +23,7 @@ os.makedirs(app.instance_path, exist_ok=True)
 
 # Ensure the database and tables are created
 with app.app_context():
-    db.create_all()  # This will create the test.db file and the tables if they don't exist
+    db.create_all()  # Create the tables if they don't exist
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
