@@ -4,10 +4,26 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__, instance_relative_config=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.instance_path, 'test.db')
+
+# Determine the correct database path based on the environment
+if os.getenv("VERCEL_ENV"):
+    # If the app is running on Vercel, store the database in the writable /tmp directory
+    db_path = '/tmp/test.db'
+else:
+    # If running locally, store the database in the instance directory
+    db_path = os.path.join(app.instance_path, 'test.db')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Optional: Disable track modifications
 
 db = SQLAlchemy(app)
+
+# Create the instance folder if it doesn't exist
+os.makedirs(app.instance_path, exist_ok=True)
+
+# Ensure the database and tables are created
+with app.app_context():
+    db.create_all()  # This will create the test.db file and the tables if they don't exist
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -16,9 +32,6 @@ class Todo(db.Model):
 
     def __repr__(self):
         return '<Task %r>' % self.id
-
-# Create the instance folder if it doesn't exist
-os.makedirs(app.instance_path, exist_ok=True)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -31,7 +44,8 @@ def index():
             db.session.commit()
             return redirect(url_for('index', _external=True))
 
-        except:
+        except Exception as e:
+            print(f"Error adding task: {str(e)}")  # Print the error for debugging
             return 'There was an issue adding your task'
     else:
         tasks = Todo.query.order_by(Todo.date_created).all()
@@ -47,12 +61,11 @@ def delete(id):
         return redirect(url_for('index', _external=True))
     
     except Exception as e:
-        print(f"Error: {str(e)}")
-        print(f"Task to delete: {task_to_delete}")
-
+        db.session.rollback()  # Rollback in case of an error
+        print(f"Error deleting task: {str(e)}")
         return "There was a problem"
-    
-@app.route('/update/<int:id>', methods=['GET','POST'])
+
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
 def update(id):
     task = Todo.query.get_or_404(id)
 
@@ -63,7 +76,9 @@ def update(id):
             db.session.commit()
             return redirect(url_for('index', _external=True))
 
-        except:
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error updating task: {str(e)}")
             return 'There was a problem'
 
     else:
