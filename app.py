@@ -5,13 +5,20 @@ from datetime import datetime
 
 app = Flask(__name__, instance_relative_config=True)
 
-# Determine the correct database path based on the environment
-if os.getenv("VERCEL_ENV"):
-    # If the app is running on Vercel, store the database in the writable /tmp directory
-    db_path = '/tmp/test.db'
-else:
-    # If running locally, store the database in the instance directory
-    db_path = os.path.join(app.instance_path, 'test.db')
+# # Determine the correct database path based on the environment
+# if os.getenv("VERCEL_ENV"):
+#     # If the app is running on Vercel, store the database in the writable /tmp directory
+#     db_path = '/tmp/test.db'
+# else:
+#     # If running locally, store the database in the instance directory
+#     db_path = os.path.join(app.instance_path, 'test.db')
+
+# Simulate Vercel environment locally
+os.environ["VERCEL_ENV"] = "development"
+
+# Set the database path
+db_path = '/tmp/test.db' if os.getenv("VERCEL_ENV") else os.path.join(os.getcwd(), 'instance', 'test.db')
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Optional: Disable track modifications
