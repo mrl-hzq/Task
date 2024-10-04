@@ -46,9 +46,12 @@ def delete(id):
         db.session.commit()
         return redirect(url_for('index', _external=True))
     
-    except:
-        return "There was a problem"
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        print(f"Task to delete: {task_to_delete}")
 
+        return "There was a problem"
+    
 @app.route('/update/<int:id>', methods=['GET','POST'])
 def update(id):
     task = Todo.query.get_or_404(id)
