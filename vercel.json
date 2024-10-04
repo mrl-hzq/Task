@@ -7,9 +7,17 @@
     }
   ],
   "routes": [
+    { 
+      "src": "/delete/(?<id>.*)", 
+      "dest": "app.py" 
+    },
+    { 
+      "src": "/update/(?<id>.*)", 
+      "dest": "app.py" 
+    },
     {
-      "src": "/(.*)",
-      "dest": "app.py"
+      "src": "/(.*)", 
+      "dest": "app.py" 
     }
   ]
 }
