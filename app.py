@@ -29,8 +29,8 @@ def index():
         try:
             db.session.add(new_task)
             db.session.commit()
-            return redirect('/')
-        
+            return redirect(url_for('index', _external=True))
+
         except:
             return 'There was an issue adding your task'
     else:
@@ -44,14 +44,13 @@ def delete(id):
     try: 
         db.session.delete(task_to_delete)
         db.session.commit()
-        return redirect('/')
+        return redirect(url_for('index', _external=True))
     
     except:
         return "There was a problem"
-    
+
 @app.route('/update/<int:id>', methods=['GET','POST'])
 def update(id):
-
     task = Todo.query.get_or_404(id)
 
     if request.method == 'POST':
@@ -59,7 +58,7 @@ def update(id):
 
         try:
             db.session.commit()
-            return redirect('/')
+            return redirect(url_for('index', _external=True))
 
         except:
             return 'There was a problem'
