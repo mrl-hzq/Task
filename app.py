@@ -29,12 +29,16 @@ def index():
         try:
             db.session.add(new_task)
             db.session.commit()
-            return redirect('/')
+            # return redirect('/')
+            return redirect(url_for('/', _external=True))
+
         except:
             return 'There was an issue adding your task'
     else:
         tasks = Todo.query.order_by(Todo.date_created).all()
-        return render_template('index.html', tasks=tasks)
+        # return render_template('index.html', tasks=tasks)
+        return redirect(url_for('index.html', tasks=tasks, _external=True))
+
 
 @app.route('/delete/<int:id>')
 def delete(id):
@@ -43,7 +47,8 @@ def delete(id):
     try: 
         db.session.delete(task_to_delete)
         db.session.commit()
-        return redirect('/')
+        # return redirect('/')
+        return redirect(url_for('/', _external=True))
     
     except:
         return "There was a problem"
@@ -58,13 +63,15 @@ def update(id):
 
         try:
             db.session.commit()
-            return redirect('/')
+            # return redirect('/')
+            return redirect(url_for('/', _external=True))
 
         except:
             return 'There was a problem'
 
     else:
-        return render_template('update.html', task=task)
+        # return render_template('update.html', task=task)
+        return redirect(url_for('update.html', task=task, _external=True))
 
 if __name__ == "__main__":
     app.run(debug=True)
